@@ -2,9 +2,9 @@ const express = require("express");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
-const userRouter = require("./server/routes/users");
-const cardRouter = require("./server/routes/cards");
-const PORT = 3000;
+const userRouter = require("./routes/users");
+const cardRouter = require("./routes/cards");
+const { PORT = 3000} = process.env;
 const app = express();
 
 app.use((req, res, next) => {
@@ -21,6 +21,9 @@ mongoose.connect("mongodb://localhost:27017/mestodb");
 
 app.use("/", userRouter);
 app.use("/", cardRouter);
+app.use("*", (req, res) => {
+    throw new Error("Страница не найдена");
+});
 
 
 app.listen(PORT, () => {
