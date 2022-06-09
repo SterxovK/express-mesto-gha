@@ -17,12 +17,12 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    type: ObjectId,
+    type: mongoose.ObjectId,
     required: true,
   },
   likes: [
     {
-      type: ObjectId,
+      type: mongoose.ObjectId,
       required: true,
       default: [],
     },
@@ -33,3 +33,7 @@ const cardSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+const cardModel = mongoose.model("card", cardSchema);
+
+module.exports = cardModel;

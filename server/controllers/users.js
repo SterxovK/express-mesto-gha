@@ -1,8 +1,4 @@
-const path = require("path");
-
 const User = require("../models/user");
-const pathToFile = path.join(__dirname, "..", "data", "users.json");
-const readFile = require("../utils/read-file");
 
 const usersController = (_req, res) => {
   User.find()
@@ -29,4 +25,23 @@ const createUser = (req, res) => {
     .catch((err) => res.status(400).send(err));
 };
 
-module.exports = { usersController, userController, createUser };
+const updateUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about, avatar })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+}
+const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+};
+
+module.exports = {
+  usersController,
+  userController,
+  createUser,
+  updateUser,
+  updateAvatar,
+};
