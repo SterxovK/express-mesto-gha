@@ -18,8 +18,8 @@ app.use(bodyParser.json());
 
 mongoose.connect("mongodb://localhost:27017/mestodb");
 
-app.use("/users", userRouter);
-app.use("/cards", cardRouter);
+app.use("/", userRouter);
+app.use("/", cardRouter);
 
 //ДЛЯ ПОЛУЧЕНИЯ ID пользователя, временное решение
 
