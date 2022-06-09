@@ -23,7 +23,6 @@ const cardSchema = new mongoose.Schema({
   likes: [
     {
       type: mongoose.ObjectId,
-      required: true,
       default: [],
     },
   ],

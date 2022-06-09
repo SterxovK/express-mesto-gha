@@ -15,13 +15,13 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect("mongodb://localhost:27017/mestodb");
 
 app.use("/", userRouter);
 app.use("/", cardRouter);
 
-//ДЛЯ ПОЛУЧЕНИЯ ID пользователя, временное решение
 
 app.listen(PORT, () => {
   console.log(`Listening port ${PORT}`);
