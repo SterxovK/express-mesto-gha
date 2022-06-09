@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 
 const userRouter = require("./server/routes/users");
 const cardRouter = require("./server/routes/cards");
-const PORT = 3000;
+const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use((req, res, next) => {
@@ -20,6 +20,9 @@ mongoose.connect("mongodb://localhost:27017/mestodb");
 
 app.use("/", userRouter);
 app.use("/", cardRouter);
+app.all("*", () => {
+  throw new NotFoundError("Запрашиваемая страница не найдена");
+});
 
 //ДЛЯ ПОЛУЧЕНИЯ ID пользователя, временное решение
 
