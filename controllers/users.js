@@ -1,5 +1,6 @@
-const res = require("express/lib/response");
 const User = require("../models/user");
+const NotFoundError = require("../errors/NotFoundError");
+const InvalidRequest = require("../errors/InvalidRequest");
 
 const getUsers = (_req, res, next) => {
   User.find()
@@ -7,40 +8,32 @@ const getUsers = (_req, res, next) => {
     .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { userId } = req.params;
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(400)
-          .send({ massage: "Пользователь по данному id не найдена" });
-      }
-      return res.status(200).send(user);
+  return User.findById(userId)
+    .orFail(() => {
+      throw new NotFoundError("нет пользователя с таким id");
     })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(404).send({ massage: "Некорректные данные" });
+        next(new InvalidRequest("Некорректные данные"));
+      } else {
+        next(err);
       }
-      return res.status(500).send({ massage: err.massage });
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   User.countDocuments()
     .then((count) => User.create({ id: count, ...req.body }))
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(400)
-          .send({
-            massage: "Переданы некорректные данные при создании пользователя",
-          });
-      }
-      return res.status(200).send(user);
-    })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
-      return res.status(500).send({ massage: err.massage });
+      if (err.name === "ValidationError") {
+        next(new InvalidRequest("ошибка валидации"));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -52,42 +45,27 @@ const updateUser = (req, res) => {
     { name, about },
     { new: true, runValidators: true }
   )
-    .then((user) => {
-      if (!user) {
-        return res.status(400).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
-      }
-      return res.status(200).send(user);
-    })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
-     if (err.name === "ValidationError") {
-        return res.status(400).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
+      if (err.name === "CastError") {
+        next(new InvalidRequest("ошибка валидации"));
+      } else {
+        next(err);
       }
-      return res.status(500).send({ massage: err.massage });
     });
 };
+
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        return res.status(400).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
-      }
-      return res.status(200).send(user);
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
+      if (err.name === "CastError") {
+        next(new InvalidRequest("ошибка валидации"));
+      } else {
+        next(err);
       }
-      return res.status(500).send({ massage: err.massage });
     });
 };
 
