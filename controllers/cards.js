@@ -16,18 +16,11 @@ const getCards = (_req, res) => {
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
-  User.findById(req.user._id)
-    .then((owner) => {
-      console.log(owner);
-      Card.create({ name, link, owner });
-    })
-    .then((card) => res.send(card))
+  const { owner } = req.user._id;
+    return  Card.create({ name, link, owner })
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === "CastError") {
-        return res
-          .status(404)
-          .send({ massage: "Пользователь по данному id не найден" });
-      } else if (err.name === "ValidationError") {
+      if (err.name === "ValidationError") {
         return res.status(400).send({
           massage: "Переданы некорректные данные при создании пользователя",
         });
@@ -46,19 +39,18 @@ const deleteCard = (req, res) => {
         return res
           .status(404)
           .send({ massage: "Пользователь по данному id не найден" });
-      } else if (err.name === "ValidationError") {
-        return res.status(400).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
       }
-      return res.status(500).send({ massage: err.massage });
     });
 };
 
 const likeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
+  Card.findByIdAndUpdate(
+    cardId,
+    { $addToSet: { likes: owner } },
+    { new: true, runValidators: true }
+  )
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === "CastError") {
@@ -77,7 +69,11 @@ const likeCard = (req, res) => {
 const dislikeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
+  Card.findByIdAndUpdate(
+    cardId,
+    { $pull: { likes: owner } },
+    { new: true, runValidators: true }
+  )
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === "CastError") {
