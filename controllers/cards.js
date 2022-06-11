@@ -4,7 +4,14 @@ const User = require("../models/user");
 const getCards = (_req, res) => {
   Card.find()
     .then((data) => res.send(data))
-    .catch((_) => res.status(404).sand({ massage: "No file" }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
+      }
+      return res.status(500).send({ massage: err.massage });
+    });
 };
 
 const createCard = (req, res) => {
@@ -15,7 +22,18 @@ const createCard = (req, res) => {
       Card.create({ name, link, owner });
     })
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ messege: "Произошла ошибка" }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(404)
+          .send({ massage: "Пользователь по данному id не найден" });
+      } else if (err.name === "ValidationError") {
+        return res.status(400).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
+      }
+      return res.status(500).send({ massage: err.massage });
+    });
 };
 
 //DELETE
@@ -23,31 +41,56 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
     .then((_) => res.send({ message: "карточка удалена" }))
-    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(404)
+          .send({ massage: "Пользователь по данному id не найден" });
+      } else if (err.name === "ValidationError") {
+        return res.status(400).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
+      }
+      return res.status(500).send({ massage: err.massage });
+    });
 };
 
 const likeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true },)
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === "CastError") {
-        new Error("Переданы некорректные данные...");
+        return res
+          .status(404)
+          .send({ massage: "Пользователь по данному id не найден" });
+      } else if (err.name === "ValidationError") {
+        return res.status(400).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
       }
+      return res.status(500).send({ massage: err.massage });
     });
 };
 
 const dislikeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true },)
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === "CastError") {
-      return res.status(400).send({messege:"Переданы некорректные данные..."})
+        return res
+          .status(404)
+          .send({ massage: "Пользователь по данному id не найден" });
+      } else if (err.name === "ValidationError") {
+        return res.status(400).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
       }
-      });
+      return res.status(500).send({ massage: err.massage });
+    });
 };
 
 module.exports = {
