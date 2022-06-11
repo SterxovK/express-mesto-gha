@@ -1,21 +1,13 @@
 const Card = require("../models/card");
 const User = require("../models/user");
 
-const cardsController = (_req, res) => {
+const getCards = (_req, res) => {
   Card.find()
     .then((data) => res.send(data))
     .catch((_) => res.status(404).sand({ massage: "No file" }));
 };
 
-//DELETE
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((_) => res.send({ message: "карточка удалена" }))
-    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
-};
-
 const createCard = (req, res) => {
-  console.log(req.user._id); // _id станет доступен
   const { name, link } = req.body;
   User.findById(req.user._id)
     .then((owner) => {
@@ -23,26 +15,43 @@ const createCard = (req, res) => {
       Card.create({ name, link, owner });
     })
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ messege: err.massege }));
+    .catch((err) => res.status(500).send({ messege: "Произошла ошибка" }));
 };
 
-const likeCard = (req, res) =>
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true }
-  );
+//DELETE
+const deleteCard = (req, res) => {
+  const { cardId } = req.params;
+  Card.findByIdAndRemove(cardId)
+    .then((_) => res.send({ message: "карточка удалена" }))
+    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+};
+
+const likeCard = (req, res) => {
+  const owner = req.user._id;
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true },)
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === "CastError") {
+        new Error("Переданы некорректные данные...");
+      }
+    });
+};
 
 const dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true }
-  );
+  const owner = req.user._id;
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true },)
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === "CastError") {
+      return res.status(400).send({messege:"Переданы некорректные данные..."})
+      }
+      });
 };
 
 module.exports = {
-  cardsController,
+  getCards,
   createCard,
   deleteCard,
   likeCard,

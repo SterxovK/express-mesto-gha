@@ -2,13 +2,13 @@ const res = require("express/lib/response");
 const User = require("../models/user");
 
 
-const usersController = (_req, res) => {
+const getUsers = (_req, res) => {
   User.find()
     .then((data) => res.send(data))
     .catch((_) => res.status(404).sand({ massage: "No file" }));
 };
 
-const userController = (req, res) => {
+const getUser = (req, res) => {
   const { userId } = req.params;
   const error = new Error("Такого id не существует");
   error.name ="InvalidId";
@@ -49,8 +49,8 @@ const updateAvatar = (req, res) => {
 };
 
 module.exports = {
-  usersController,
-  userController,
+  getUsers,
+  getUser,
   createUser,
   updateUser,
   updateAvatar,
