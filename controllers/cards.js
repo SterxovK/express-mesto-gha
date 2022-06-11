@@ -37,12 +37,16 @@ const deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res
-          .status(404)
+          .status(400)
           .send({ massage: "Пользователь по данному id не найден" });
+      } else if (err.name === "ValidationError") {
+        return res.status(404).send({
+          massage: "Переданы некорректные данные при создании пользователя",
+        });
       }
+      return res.status(500).send({ massage: err.massage });
     });
 };
-
 const likeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
@@ -55,10 +59,10 @@ const likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res
-          .status(404)
+          .status(400)
           .send({ massage: "Пользователь по данному id не найден" });
       } else if (err.name === "ValidationError") {
-        return res.status(400).send({
+        return res.status(404).send({
           massage: "Переданы некорректные данные при создании пользователя",
         });
       }
@@ -78,10 +82,10 @@ const dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res
-          .status(404)
+          .status(400)
           .send({ massage: "Пользователь по данному id не найден" });
       } else if (err.name === "ValidationError") {
-        return res.status(400).send({
+        return res.status(404).send({
           massage: "Переданы некорректные данные при создании пользователя",
         });
       }

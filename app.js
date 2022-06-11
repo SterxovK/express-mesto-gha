@@ -22,7 +22,7 @@ mongoose.connect("mongodb://localhost:27017/mestodb");
 app.use("/", userRouter);
 app.use("/", cardRouter);
 app.use("*", (req, res) => {
-    throw new Error("Страница не найдена");
+    res.status(404).send({message: "Страница не найдена"});
 });
 
 

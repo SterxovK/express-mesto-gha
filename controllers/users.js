@@ -17,13 +17,9 @@ const getUser = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res
-          .status(400)
+          .status(404)
           .send({ massage: "Пользователь по данному id не найден" });
-      } else if (err.name === "ValidationError") {
-        return res.status(404).send({
-          massage: "Переданы некорректные данные при создании пользователя",
-        });
-      }
+      } 
       return res.status(500).send({ massage: err.massage });
     });
 };
