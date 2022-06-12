@@ -5,7 +5,7 @@ const getUsers = (_req, res) => {
     .then((users) => res.send({ data: users }))
     .catch((err) => {
       if (err.user === "ValidationError") {
-        res.status(400).send({ massage: "User don't serch" });
+        res.status(400).send({ message: "User don't serch" });
         return;
       }
       res.status(500).send({ message: "Server error" });
@@ -17,14 +17,14 @@ const getUser = (req, res) => {
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ massage: "User don't serch" });
+        res.status(404).send({ message: "User don't serch" });
         return;
       }
       res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({ massage: "Id don't serch" });
+        res.status(400).send({ message: "Id don't serch" });
       }
       res.status(500).send({ message: "Server error" });
     });
@@ -36,7 +36,7 @@ const createUser = (req, res) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({ massage: "not correct" });
+        res.status(400).send({ message: "not correct" });
         return;
       }
       res.status(500).send({ message: "Server error" });
@@ -53,7 +53,7 @@ const updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ massage: "User don't serch" });
+        res.status(404).send({ message: "User don't serch" });
         return;
       }
       res.status(200).send({ data: user });
@@ -64,7 +64,7 @@ const updateUser = (req, res) => {
         err.about === "ValidationError" ||
         err.name === "ValidationError"
       ) {
-        res.status(400).send({ massage: "data is not correct" });
+        res.status(400).send({ message: "data is not correct" });
         return;
       }
       res.status(500).send({ message: "Server error" });
@@ -78,9 +78,10 @@ const updateAvatar = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === "CastError" || err.name === "ValidationError") {
-        res.status(400).send({ massage: "data is not correct" });
+        res.status(400).send({ message: "data is not correct" });
         return;
-      }  res.status(500).send({ message: "Server error" });
+      }
+      res.status(500).send({ message: "Server error" });
     });
 };
 
