@@ -7,10 +7,10 @@ const {
   dislikeCard,
 } = require("../controllers/cards");
 
-router.get("/cards", getCards); //получить все карточки
-router.post("/cards", createCard); //создать карточку
-router.delete("/cards/:cardId", deleteCard); //удалить карточку
-router.put("/cards/:cardId/likes", likeCard); //поставить лайк карточке
-router.delete("/cards/:cardId/likes", dislikeCard); //убрать лайк с карточки
+router.get("/", getCards); //получить все карточки
+router.post("/", createCard); //создать карточку
+router.delete("/:cardId", deleteCard); //удалить карточку
+router.put("/:cardId/likes", likeCard); //поставить лайк карточке
+router.delete("/:cardId/likes", dislikeCard); //убрать лайк с карточки
 
 module.exports = router;

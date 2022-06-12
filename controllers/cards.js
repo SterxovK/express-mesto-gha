@@ -1,6 +1,6 @@
 const Card = require("../models/card");
 
-const getCards = (_req, res) => {
+const getCards = (res) => {
   Card.find({})
     .then((cards) => {
       res.status(200).send({ data: cards });
@@ -12,12 +12,13 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send({data: card}))
+    .then((card) => res.status(201).send({data: card}))
     .catch((err) => {
       if (err.name === "ValidationError") {
         res.status(400).send({ message: "Validation is not corrected" });
         return;
-      } res.status(500).send({ message: "Server error" });
+      }
+      res.status(500).send({ message: "Server error" });
     });
 };
 
@@ -36,7 +37,8 @@ const deleteCard = (req, res) => {
       if (err.name === "CastError") {
        res.status(400).send({ message: " id is not correct" });
        return;
-      }  res.status(500).send({ message: "Server error" });
+      }
+      res.status(500).send({ message: "Server error" });
     });
 };
 
@@ -67,7 +69,7 @@ const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: owner } },
-    { new: true, runValidators: true }
+    { new: true}
   )
     .then((card) => {
       if (!card) {

@@ -1,16 +1,4 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": ["airbnb-base", "eslint:recommended", "plugin:react/recommended"],
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
-  "plugins": ["react"],
-  "rules": {"allow": ["foo_", "_bar"]}
+  "extends": "airbnb-base",
+  "rules": { "allow": "_id" }
 }

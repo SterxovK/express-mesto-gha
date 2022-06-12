@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "lint": "npx eslit"
+    "lint": "npx eslit ."
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,6 @@
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-react": "^7.30.0",
     "nodemon": "^2.0.16"
   }
 }
