@@ -1,6 +1,6 @@
 const User = require("../models/user");
 
-const getUsers = (res) => {
+const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((err) => {
