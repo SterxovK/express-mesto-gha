@@ -1,14 +1,14 @@
-const User = require("../models/user");
+const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((err) => {
-      if (err.user === "ValidationError") {
+      if (err.user === 'ValidationError') {
         res.status(400).send({ message: "User don't serch" });
         return;
       }
-      res.status(500).send({ message: "Server error" });
+      res.status(500).send({ message: 'Server error' });
     });
 };
 
@@ -23,11 +23,11 @@ const getUser = (req, res) => {
       res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: "Id don't serch" });
         return;
       }
-      res.status(500).send({ message: "Server error" });
+      res.status(500).send({ message: 'Server error' });
     });
 };
 
@@ -36,11 +36,11 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(400).send({ message: "not correct" });
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'not correct' });
         return;
       }
-      res.status(500).send({ message: "Server error" });
+      res.status(500).send({ message: 'Server error' });
     });
 };
 
@@ -50,7 +50,7 @@ const updateUser = (req, res) => {
   User.findByIdAndUpdate(
     owner,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -61,13 +61,13 @@ const updateUser = (req, res) => {
     })
     .catch((err) => {
       if (
-        err.name === "CastError" ||
-        err.name === "ValidationError"
+        err.name === 'CastError'
+        || err.name === 'ValidationError'
       ) {
-        res.status(400).send({ message: "data is not correct" });
+        res.status(400).send({ message: 'data is not correct' });
         return;
       }
-      res.status(500).send({ message: "Server error" });
+      res.status(500).send({ message: 'Server error' });
     });
 };
 
@@ -83,11 +83,11 @@ const updateAvatar = (req, res) => {
       res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "CastError" || err.name === "ValidationError") {
-        res.status(400).send({ message: "data is not correct" });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'data is not correct' });
         return;
       }
-      res.status(500).send({ message: "Server error" });
+      res.status(500).send({ message: 'Server error' });
     });
 };
 
