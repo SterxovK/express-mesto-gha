@@ -1,35 +1,39 @@
 const Card = require('../models/card');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       res.status(200).send({ data: cards });
     })
-    .catch(() => res.status(500).send({ message: 'Server error' }));
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = async (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
-  Card.create({ name, link, owner })
-    .then((card) => res.status(201).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Validation is not corrected' });
-        return;
-      }
-      res.status(500).send({ message: 'Server error' });
-    });
+  try {
+    const card = await Card.create({ name, link, owner });
+    res.status(201).send({ data: card });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      res.status(400).send({ message: 'Validation is not corrected' });
+    } else {
+      next(error);
+    }
+  }
 };
 
 // DELETE
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Card this id not found' });
         return;
+      }
+      if (card.owner._id.toString() !== req.user._id.toString()) {
+        res.status(403).send({ message: "someone else's card" });
       }
       res.send({ data: card });
     })
@@ -38,7 +42,7 @@ const deleteCard = (req, res) => {
         res.status(400).send({ message: ' id is not correct' });
         return;
       }
-      res.status(500).send({ message: 'Server error' });
+      next(err);
     });
 };
 
@@ -66,11 +70,7 @@ const likeCard = (req, res) => {
 const dislikeCard = (req, res) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(
-    cardId,
-    { $pull: { likes: owner } },
-    { new: true },
-  )
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Card this id not found' });
