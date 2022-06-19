@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const AuthError = require('../Error/AuthError');
+
+const REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -19,6 +22,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default:
       'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (value) => REGEX.test(value),
+      message: 'Invalid URL',
+    },
   },
   email: {
     type: String,
@@ -34,12 +41,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new AuthError('Неправильные почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error('Неправильные почта или пароль'));
+          return Promise.reject(new AuthError('Неправильные почта или пароль'));
         }
 
         return user; // теперь user доступен

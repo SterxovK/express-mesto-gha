@@ -1,8 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../Error/NotFoundError');
+const CastError = require('../Error/CastError');
+const ConflictEmailError = require('../Error/ConflictEmailError');
+const NotValidError = require('../Error/NotFoundError');
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -10,67 +14,55 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
         expiresIn: '7d',
       });
-
       // вернём токен
       res.send({ token });
     })
-    .catch((err) => {
-      // ошибка аутентификации
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      if (err.user === 'ValidationError') {
-        res.status(400).send({ message: "User don't serch" });
-        return;
-      }
-      res.status(500).send({ message: 'Server error' });
-    });
+    .catch((err) => next(err));
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { userId } = req.params;
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "User don't serch" });
-        return;
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: "Id don't serch" });
-        return;
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new CastError('Некорректный id пользователя'));
+      } else {
+        next(error);
       }
-      res.status(500).send({ message: 'Server error' });
     });
 };
 
-const getUserMe = (req, res) => {
+const getUserMe = (req, res, next) => {
   const { userId } = req.user._id;
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "User don't serch" });
-        return;
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: "Id don't serch" });
-        return;
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new CastError('Некорректный id пользователя'));
+      } else {
+        next(error);
       }
-      res.status(500).send({ message: 'Server error' });
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -86,15 +78,15 @@ const createUser = (req, res) => {
     }))
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'not correct' });
-        return;
+      if (err.code === 11000) {
+        next(new ConflictEmailError('Такой Email уже существует'));
+      } else {
+        next(err);
       }
-      res.status(500).send({ message: 'Server error' });
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(
@@ -104,37 +96,35 @@ const updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "User don't serch" });
-        return;
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(400).send({ message: 'data is not correct' });
-        return;
+    .catch((error) => {
+      if (error.name === 'NotValidError') {
+        next(new NotValidError('Некорректные данные'));
+      } else {
+        next(error);
       }
-      res.status(500).send({ message: 'Server error' });
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "User don't serch" });
-        return;
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(400).send({ message: 'data is not correct' });
-        return;
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new CastError('Некорректный id пользователя'));
+      } else {
+        next(error);
       }
-      res.status(500).send({ message: 'Server error' });
     });
 };
 

@@ -1,4 +1,8 @@
 const Card = require('../models/card');
+const NotFoundError = require('../Error/NotFoundError');
+const CastError = require('../Error/CastError');
+const ForbiddenError = require('../Error/ForbiddenError');
+const NotValidError = require('../Error/NotFoundError');
 
 const getCards = (req, res, next) => {
   Card.find({})
@@ -16,7 +20,7 @@ const createCard = async (req, res, next) => {
     res.status(201).send({ data: card });
   } catch (error) {
     if (error.name === 'ValidationError') {
-      res.status(400).send({ message: 'Validation is not corrected' });
+      next(new NotValidError('Validation is not corrected'));
     } else {
       next(error);
     }
@@ -29,61 +33,54 @@ const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card this id not found' });
-        return;
+        throw new NotFoundError('Card this id not found');
       }
       if (card.owner._id.toString() !== req.user._id.toString()) {
-        res.status(403).send({ message: "someone else's card" });
+        throw new ForbiddenError("someone else's card");
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: ' id is not correct' });
-        return;
+        throw new CastError(' id is not correct');
       }
       next(err);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   const owner = req.user._id;
   const { cardId } = req.params;
-
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card this id not found' });
-        return;
+        throw new NotFoundError('Card this id not found');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: ' id is not correct' });
-        return;
+        throw new CastError(' id is not correct');
       }
-      res.status(500).send({ message: 'Server error' });
+      next(err);
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   const owner = req.user._id;
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card this id not found' });
-        return;
+        throw new NotFoundError('Card this id not found');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: ' id is not correct' });
-        return;
+        throw new CastError(' id is not correct');
       }
-      res.status(500).send({ message: 'Server error' });
+      next(err);
     });
 };
 
