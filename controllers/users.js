@@ -62,28 +62,34 @@ const getUserMe = (req, res, next) => {
     });
 };
 
-const createUser = (req, res, next) => {
+const createUser = async (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    email, password, name, about, avatar,
   } = req.body;
-
-  return bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({
+  try {
+    const hashPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      email,
+      password: hashPassword,
       name,
       about,
       avatar,
-      email,
-      password: hash,
-    }))
-    .then((user) => res.status(201).send({ data: user }))
-    .catch((err) => {
-      if (err.code === 11000) {
-        next(new ConflictEmailError('Такой Email уже существует'));
-      } else {
-        next(err);
-      }
     });
+    res.status(201).send({
+      user: {
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictEmailError('Такой Email уже существует'));
+    } else {
+      next(err);
+    }
+  }
 };
 
 const updateUser = (req, res, next) => {
