@@ -8,6 +8,8 @@ const {
   getUserMe,
 } = require('../controllers/users');
 
+const REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/;
+
 router.get('/', getUsers); // получить всех юзеров
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
@@ -25,6 +27,21 @@ router.patch(
   }),
   updateUser,
 ); // обновляет профиль
-router.patch('/me/avatar', updateAvatar); // обновляет аватар
+router.patch(
+  '/me/avatar',
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string()
+        .min(2)
+        .custom((value, helpers) => {
+          if (REGEX.test(value)) {
+            return value;
+          }
+          return helpers.message('Некорректная ссылка');
+        }),
+    }),
+  }),
+  updateAvatar,
+); // обновляет аватар
 
 module.exports = router;
