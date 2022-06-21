@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
   const { cookies } = req;
   console.log(req.cookies);
   if (!cookies) {
-    return res.status(403).send({ message: 'Необходима авторизация' });
+    return res.status(401).send({ message: 'Необходима авторизация' });
   }
   const token = cookies.jwt;
   let payload;
