@@ -6,34 +6,31 @@ const CastError = require('../Error/CastError');
 const ConflictEmailError = require('../Error/ConflictEmailError');
 const NotValidError = require('../Error/NotFoundError');
 
-const { JWT_SECRET } = process.env;
+// const { JWT_SECRET } = 'secret-key';
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
+      console.log(user);
       // создадим токен
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, 'secret-key', {
         expiresIn: '7d',
       });
+      console.log(token);
       // вернём токен
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
+        sameSite: true,
       })
         .end();
     })
     .catch(next);
 };
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch((err) => next(err));
-};
-
-const getUser = (req, res, next) => {
-  const { userId } = req.params;
+const getUserMe = (req, res, next) => {
+  const userId = req.user._id;
   return User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -50,8 +47,14 @@ const getUser = (req, res, next) => {
     });
 };
 
-const getUserMe = (req, res, next) => {
-  const { userId } = req.user._id;
+const getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.send({ data: users }))
+    .catch((err) => next(err));
+};
+
+const getUser = (req, res, next) => {
+  const { userId } = req.params;
   return User.findById(userId)
     .then((user) => {
       if (!user) {

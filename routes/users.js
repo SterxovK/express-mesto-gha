@@ -10,13 +10,16 @@ const {
 
 const REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/;
 
+router.get('/me', getUserMe); // получить свой профиль
+
 router.get('/', getUsers); // получить всех юзеров
+
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().length(24).hex(),
   }),
 }), getUser); // получить юзера по id
-router.get('/me', getUserMe); // получить свой профиль
+
 router.patch(
   '/me',
   celebrate({
@@ -27,6 +30,7 @@ router.patch(
   }),
   updateUser,
 ); // обновляет профиль
+
 router.patch(
   '/me/avatar',
   celebrate({
