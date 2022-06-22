@@ -6,18 +6,14 @@ const CastError = require('../Error/CastError');
 const ConflictEmailError = require('../Error/ConflictEmailError');
 const NotValidError = require('../Error/NotFoundError');
 
-// const { JWT_SECRET } = 'secret-key';
-
 const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      console.log(user);
       // создадим токен
       const token = jwt.sign({ _id: user._id }, 'secret-key', {
         expiresIn: '7d',
       });
-      console.log(token);
       // вернём токен
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,

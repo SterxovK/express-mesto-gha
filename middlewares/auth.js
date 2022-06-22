@@ -1,28 +1,21 @@
 const jwt = require('jsonwebtoken');
-// const { AuthError } = require('../Error/AuthError');
+const AuthError = require('../Error/AuthError');
+const ForbiddenError = require('../Error/ForbiddenError');
 
-// const { JWT_SECRET } = 'secret-key';
-
-// eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
-  // eslint-disable-next-line prefer-destructuring
-  const cookies = req.cookies;
-  if (!cookies) {
-    return res.status(401).send({ messege: 'авторизация неуспешна' });
-  }
+  const { cookies } = req;
   const token = cookies.jwt;
   if (!token) {
-    return res.status(401).send({ messege: 'авторизация неуспешна' });
+    throw new AuthError('Нет пользователя с таким id');
   }
   let payload;
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    console.log('fer');
-    return res.status(403).send({ messege: 'jwt token is not valid' });
+    next(new ForbiddenError('jwt token is not valid'));
   }
   req.user = payload;
   next();
-  // return true;
+  return true;
 };
 module.exports = auth;
