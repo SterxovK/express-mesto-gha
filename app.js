@@ -1,19 +1,18 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { celebrate, Joi } = require('celebrate');
-const { errors } = require('celebrate');
-const userRouter = require('./routes/users');
-const cardRouter = require('./routes/cards');
+const mongoose = require('mongoose');
+const { celebrate, Joi, errors } = require('celebrate');
+const bodyParser = require('body-parser');
 const { login, createUser } = require('./controllers/users');
-const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 const NotFoundError = require('./Error/NotFoundError');
+const auth = require('./middlewares/auth');
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
-
 const app = express();
+
 const REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/g;
 app.use(cookieParser());
 mongoose.connect('mongodb://localhost:27017/mestodb');
@@ -50,8 +49,9 @@ app.post(
   createUser,
 );
 
-app.use('/users', auth, userRouter);
-app.use('/cards', auth, cardRouter);
+app.use(auth);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.use((req, res, next) => {
   try {

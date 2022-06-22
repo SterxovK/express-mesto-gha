@@ -1,24 +1,28 @@
 const jwt = require('jsonwebtoken');
-const { AuthError } = require('../Error/AuthError');
+// const { AuthError } = require('../Error/AuthError');
 
 // const { JWT_SECRET } = 'secret-key';
 
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
-  const { cookies } = req;
-  console.log(req.cookies);
+  // eslint-disable-next-line prefer-destructuring
+  const cookies = req.cookies;
   if (!cookies) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    return res.status(401).send({ error: 'авторизация неуспешна' });
   }
   const token = cookies.jwt;
+  if (!token) {
+    return res.status(401).send({ error: 'авторизация неуспешна' });
+  }
   let payload;
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    next(new AuthError({ message: 'Необходима авторизация' }));
+    console.log('fer');
+    return res.status(403).send({ error: 'jwt token is not valid' });
   }
   req.user = payload;
   next();
-  return true;
+  // return true;
 };
 module.exports = auth;
