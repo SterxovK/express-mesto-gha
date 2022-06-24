@@ -49,7 +49,7 @@ app.post(
   createUser,
 );
 
-// app.use(auth);
+app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
