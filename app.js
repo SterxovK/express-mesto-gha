@@ -11,6 +11,9 @@ const auth = require('./middlewares/auth');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+require('dotenv').config();
+
+console.log(process.env);
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -29,6 +32,12 @@ app.use(
 );
 
 app.use(requestLogger); // подключаем логгер запросов
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.post(
   '/signin',
