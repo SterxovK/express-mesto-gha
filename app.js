@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { login, createUser } = require('./controllers/users');
 const error = require('./middlewares/error');
 const NotFoundError = require('./Error/NotFoundError');
@@ -19,6 +20,13 @@ app.use(cookieParser());
 mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: 'https://domainname.mesto.auth.nomoredomains.xyz',
+    credentials: true,
+  }),
+);
 
 app.use(requestLogger); // подключаем логгер запросов
 
