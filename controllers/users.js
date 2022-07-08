@@ -26,7 +26,7 @@ const login = (req, res, next) => {
         httpOnly: true,
         sameSite: true,
       })
-        .end();
+        .send({ data: user });
     })
     .catch(next);
 };
@@ -74,10 +74,11 @@ const getUser = (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const {
-    email, password, name, about, avatar,
-  } = req.body;
   try {
+    const {
+      email, password, name, about, avatar,
+    } = req.body;
+
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       email,

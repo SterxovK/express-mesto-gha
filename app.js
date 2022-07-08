@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const helmet = require('helmet');
 const { login, createUser } = require('./controllers/users');
 const error = require('./middlewares/error');
 const NotFoundError = require('./Error/NotFoundError');
@@ -16,9 +17,9 @@ require('dotenv').config();
 const { PORT = 3000 } = process.env;
 const app = express();
 
-const REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/g;
 app.use(cookieParser());
 mongoose.connect('mongodb://localhost:27017/mestodb');
+app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -56,12 +57,7 @@ app.post(
       password: Joi.string().required(),
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      avatar: Joi.string().custom((value, helpers) => {
-        if (REGEX.test(value)) {
-          return value;
-        }
-        return helpers.message('Некорректная ссылка');
-      }),
+      avatar: Joi.string().trim().uri(),
     }),
   }),
   createUser,
